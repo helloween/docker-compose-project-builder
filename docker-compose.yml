@@ -6,23 +6,25 @@ services:
      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: test
-  web:
+  rails:
     build: .
-    command: puma
+    command: bundle install
+    command: bundle exec rails s
     ports:
-     - "9292:9292"
+     - "3000:3000"
     links:
      - db
+     - redis
     volumes:
-     - .:/inventory_manager
+     - /:/inner_fd
   sidekiq:
     build:
       context: ./sidekiq
-    command: bundle exec sidekiq -C config/sidekiq.yml
+    command: bash -c "bundle install && bundle exec sidekiq -C config/sidekiq.yml"
     links:
      - redis
     volumes:
-     - .:/inventory_manager
+     - /:/inner_fd
   redis:
     build:
       context: ./redis
@@ -30,4 +32,4 @@ services:
     ports:
      - "6379:6379"
     volumes:
-     - .:/inventory_manager
+     - .:/inner_fd
